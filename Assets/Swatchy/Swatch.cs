@@ -6,7 +6,14 @@ using UnityEngine;
 namespace Swatchy {
 	public class Swatch : ScriptableObject {
 		public Color[] colors;
-	
+
+		public Color GetColor(int colorIndex) {
+			if (colors == null || colors.Length <= colorIndex || colorIndex < 0) {
+				return Color.white;
+			}
+			return colors[colorIndex];
+		}
+
 		public static Swatch FromSwatchASEFile(SwatchASEFile file) {
 			var swatchScriptableObject = ScriptableObject.CreateInstance<Swatch>();
 			swatchScriptableObject.colors = new Color[file.colors.Count];
