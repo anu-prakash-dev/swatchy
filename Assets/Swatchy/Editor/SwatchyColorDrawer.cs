@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 
 namespace Swatchy {
+
 	[CustomPropertyDrawer(typeof(SwatchyColor))]
 	public class SwatchyColorDrawer : PropertyDrawer {
 
@@ -15,120 +16,90 @@ namespace Swatchy {
 
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
 			SwatchyColor swatchyColor = (SwatchyColor)fieldInfo.GetValue(property.serializedObject.targetObject);
+			Swatch swatch = swatchyColor.swatch;
 			Color color = swatchyColor.color;
-			var swatch = swatchyColor.swatch;
-			// Using BeginProperty / EndProperty on the parent property means that
-			// prefab override logic works on the entire property.
-			EditorGUI.BeginProperty(position, label, property);
-
-			// Draw label
-			position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
-
-			// Don't make child fields be indented
-			var indent = EditorGUI.indentLevel;
-			EditorGUI.indentLevel = 0;
-
-			// Calculate rects
-			// var swatchColorRect = new Rect(position.x, position.y, 30, position.height);
-			var swatchSize = EditorGUIUtility.singleLineHeight;
-			var keySize = EditorGUIUtility.singleLineHeight*1.25f;
-			var spacing = EditorGUIUtility.singleLineHeight * 0.5f;
-			var swatchObjectRect = new Rect(position.x, position.y, 120, EditorGUIUtility.singleLineHeight);
-			swatchObjectRect.width = swatch == null ? position.width : position.width - swatchSize - keySize - spacing * 2;
-			swatchObjectRect.position = new Vector2(swatch == null ? position.x : position.x + swatchSize + keySize + spacing * 2, position.y);
-
-			var swatchRect = new Rect(position.x, position.y, swatchSize, EditorGUIUtility.singleLineHeight);
-			var colorIndexRect = new Rect(swatchRect.position.x + swatchRect.width + spacing, position.y, keySize, EditorGUIUtility.singleLineHeight);
-
-
 			if (swatchTexture == null) {
 				swatchTexture = textureWithColor(color);
 			}
-			// Draw fields - passs GUIContent.none to each so they are drawn without labels
+
+			var swatchProperty = property.FindPropertyRelative("_swatch");
+			var colorIndexProperty = property.FindPropertyRelative("_colorIndex");
+
+			position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
+
+			var swatchSize 				= EditorGUIUtility.singleLineHeight;
+			var keySize 				= EditorGUIUtility.singleLineHeight*1.25f;
+			var spacing 				= EditorGUIUtility.singleLineHeight * 0.5f;
+			var swatchObjectWidth  		= swatch == null ? position.width : position.width - swatchSize - keySize - spacing * 2;
+			var swatchObjectPositionX 	= swatch == null ? position.x : position.x + swatchSize + keySize + spacing * 2;
+			var swatchObjectRect 		= new Rect(swatchObjectPositionX, position.y, swatchObjectWidth, EditorGUIUtility.singleLineHeight);
+			var swatchRect 				= new Rect(position.x, position.y, swatchSize, EditorGUIUtility.singleLineHeight);
+			var colorIndexRect 			= new Rect(swatchRect.position.x + swatchRect.width + spacing, position.y, keySize, EditorGUIUtility.singleLineHeight);
+
+			EditorGUI.BeginProperty(position, label, property);
+
+
+			var indent = EditorGUI.indentLevel;
+			EditorGUI.indentLevel = 0;
+
+
 
 			// Draw Swatch object
-			EditorGUI.PropertyField(swatchObjectRect, property.FindPropertyRelative("_swatch"), GUIContent.none);
+			EditorGUI.BeginChangeCheck();
+			EditorGUI.PropertyField(swatchObjectRect, swatchProperty, GUIContent.none);
+			if (EditorGUI.EndChangeCheck()) {
+				property.serializedObject.ApplyModifiedProperties();
+				swatchyColor.swatch = swatchyColor._swatch; // hack which calls observer pattern
+				UpdateActiveSwatch(swatchyColor.color);
+			}
+
 			// Draw Color index text field
 			if (swatch != null) {
 				EditorGUI.BeginChangeCheck();
-				EditorGUI.PropertyField(colorIndexRect, property.FindPropertyRelative("_colorIndex"), GUIContent.none);
+				EditorGUI.PropertyField(colorIndexRect, colorIndexProperty, GUIContent.none);
 				if (EditorGUI.EndChangeCheck()) {
-					if (swatch != null) {
-						var colorIndex = property.FindPropertyRelative("_colorIndex").intValue;
-						var newcolor = swatch.GetColor(colorIndex);
-						swatchyColor.colorIndex = colorIndex; // hack which calls observer pattern
-						UpdateActiveSwatch(newcolor);
-					}
+					property.serializedObject.ApplyModifiedProperties();
+					swatchyColor.colorIndex = colorIndexProperty.intValue; // hack which calls observer pattern
+					UpdateActiveSwatch(swatchyColor.color);
 				}
 
-
-
-				/*
-				var foldOutStyle = EditorStyles.foldout;
-				foldOut = EditorGUI.Foldout(swatchRect, foldOut,"" , foldOutStyle);
-				*/
-				// open color window
-
-				// Draw color square
-
-
-				//		var buttonStyle = new GUIStyle(EditorStyles.label);
-				var buttonStyle = new GUIStyle(GUIStyle.none);
-
-				var style = new GUIStyle();
-				style.normal.background = swatchTexture;
-				//		buttonStyle.fixedHeight = 15;
-				//		buttonStyle.fixedWidth = 15;
-				//		buttonStyle.stretchHeight = true;
-				//		buttonStyle.stretchWidth = true;
-
-				if (GUI.Button(swatchRect, "", buttonStyle)) {
+				if (DrawTextureButton(swatchTexture, swatchRect)) {
 					paletteOpen = !paletteOpen && swatch != null && swatch.colors != null && swatch.colors.Length > 0;
 				}
-
-				EditorGUI.LabelField(swatchRect, "", style);
 				DrawBlackGrid(swatchRect.x, swatchRect.y, 1, 1, (int)EditorGUIUtility.singleLineHeight);
 
 				if (paletteOpen) {
 					if (palleteTexture == null) {
 						palleteTexture = textureWithColors(swatch.colors);
 					}
-					float _scale = 15;
 					var textureRect = new Rect(swatchRect.x, swatchRect.y + EditorGUIUtility.singleLineHeight + 3, palleteTexture.width * EditorGUIUtility.singleLineHeight, palleteTexture.height * EditorGUIUtility.singleLineHeight);
-					var palleteTextureStyle = new GUIStyle();
-					palleteTextureStyle.normal.background = palleteTexture;
-					//			palleteTextureStyle.border = new RectOffset(1,1,1,1);
-					EditorGUI.LabelField(textureRect, "", palleteTextureStyle);
+					DrawTexture(palleteTexture, textureRect);
 					DrawBlackGrid(textureRect.x, textureRect.y, palleteTexture.width, palleteTexture.height, (int)EditorGUIUtility.singleLineHeight);
-
-
 
 					// listen to click
 					Event e = Event.current;
-					if (e != null) {
-						if (e.isMouse && e.button == 0) {
-							if (textureRect.Contains(e.mousePosition)) {
-								Vector2 rectClickPosition = e.mousePosition - textureRect.position;
-								int cellXIndex = (int)(rectClickPosition.x / EditorGUIUtility.singleLineHeight);
-								int cellYIndex = (int)(rectClickPosition.y / EditorGUIUtility.singleLineHeight);
-								int colorIndex = cellYIndex * palleteTexture.width + cellXIndex;
-								swatchyColor.colorIndex = colorIndex;
-								UpdateActiveSwatch(swatchyColor.color);
-							}
-							else {
-								paletteOpen = false;
-								EditorUtility.SetDirty(property.serializedObject.targetObject); // Repaint
+					if (IsClickInRect(textureRect)) {
+						Vector2 rectClickPosition = e.mousePosition - textureRect.position;
+						int cellXIndex = (int)(rectClickPosition.x / EditorGUIUtility.singleLineHeight);
+						int cellYIndex = (int)(rectClickPosition.y / EditorGUIUtility.singleLineHeight);
+						int colorIndex = cellYIndex * palleteTexture.width + cellXIndex;
+						colorIndexProperty.intValue = colorIndex;
+						property.serializedObject.ApplyModifiedProperties();
+						swatchyColor.colorIndex = colorIndex; //  calls observer pattern
+						UpdateActiveSwatch(swatchyColor.color);
+					}
+					else if (IsClick()) {
+						paletteOpen = false;
+						EditorUtility.SetDirty(property.serializedObject.targetObject); // Repaint
 
-							}
-						}
 					}
 				}
 			}
 			// Set indent back to what it was
 			EditorGUI.indentLevel = indent;
 			EditorGUI.EndProperty();
-
 		}
+
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
 			float originalHeight = base.GetPropertyHeight(property, label);
 			if (!paletteOpen || palleteTexture == null)
@@ -205,10 +176,26 @@ namespace Swatchy {
 			EditorGUI.LabelField(rect, "", tempDrawTextureStyle);
 		}
 
+		bool DrawTextureButton(Texture2D texture, Rect rect) {
+			bool buttonPressed = GUI.Button(rect, "", GUIStyle.none);
+			DrawTexture(texture, rect);
+			return buttonPressed;
+		}
+
 		void UpdateActiveSwatch(Color color) {
 			swatchTexture.SetPixel(0, 0, color);
 			swatchTexture.Apply();
 			SwatchEditorGUI.GameViewRepaint();
+		}
+
+		bool IsClick() {
+			Event e = Event.current;
+			return e != null && e.isMouse && e.button == 0;
+		}
+
+		bool IsClickInRect(Rect rect) {
+			Event e = Event.current;
+			return e != null && e.isMouse && e.button == 0 && rect.Contains(e.mousePosition);
 		}
 	}
 }

@@ -33,9 +33,9 @@ namespace Swatchy {
 		}
 
 		[SerializeField]
-		private Swatch _swatch;
+		public Swatch _swatch;
 		[SerializeField]
-		private int _colorIndex;
+		public int _colorIndex;
 
 		public event Action OnColorChanged;
 

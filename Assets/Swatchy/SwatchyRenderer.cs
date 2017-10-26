@@ -6,6 +6,7 @@ using UnityEngine;
 //  Applies a SwatchyColor in Awake to the connected Renderer's material.
 //  Does this by setting "_Color" on the renderer's Material Property Block
 namespace Swatchy {
+	[ExecuteInEditMode]
 	[RequireComponent(typeof(Renderer))]
 	public class SwatchyRenderer : MonoBehaviour {
 
@@ -19,20 +20,40 @@ namespace Swatchy {
 		void Awake() {
 			Apply();
 			swatchyColor.OnColorChanged += Apply;
+			Debug.Log("[Awake] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
+
 		}
+		/*
 		void OnDestroy() {
 			swatchyColor.OnColorChanged -= Apply;
 		}
+		*/
+
 
 		// a hack to subscribe to this object after it's created in the editor
 #if UNITY_EDITOR
 		private bool hasSubscribed;
 		void OnValidate() {
-			Debug.Log("[OnValidate] is not null" + (swatchyColor != null).ToString());
+			Debug.Log("[OnValidate] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
 			if (swatchyColor != null && !hasSubscribed) {
 				swatchyColor.OnColorChanged += Apply;
 				hasSubscribed = true;
+				Apply();
 			}
+		}
+
+
+		void OnDestroy() {
+			Debug.Log("[OnDestroy] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
+		}
+		void OnDisable() {
+			Debug.Log("[OnDisable] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
+		}
+		void OnEnable() {
+			Debug.Log("[OnEnable] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
+		}
+		void Reset() {
+			Debug.Log("[Reset] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
 		}
 #endif
 
