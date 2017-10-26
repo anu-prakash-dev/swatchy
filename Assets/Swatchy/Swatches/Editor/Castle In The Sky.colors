@@ -9,16 +9,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 1
   m_Script: {fileID: 12323, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: 
+  m_Name: Castle In The Sky
   m_EditorClassIdentifier: 
   m_Presets:
   - m_Name: 
-    m_Color: {r: 0.482353, g: 0.164706, b: 0.231373, a: 1}
+    m_Color: {r: 0.45098, g: 0.196078, b: 0.219608, a: 1}
   - m_Name: 
-    m_Color: {r: 0.898039, g: 0.462745, b: 0.380392, a: 1}
+    m_Color: {r: 0.517647, g: 0.85098, b: 0.662745, a: 1}
   - m_Name: 
-    m_Color: {r: 0.972549, g: 0.772549, b: 0.54902, a: 1}
+    m_Color: {r: 0.94902, g: 0.870588, b: 0.627451, a: 1}
   - m_Name: 
-    m_Color: {r: 0.972549, g: 0.905882, b: 0.635294, a: 1}
+    m_Color: {r: 0.94902, g: 0.737255, b: 0.54902, a: 1}
   - m_Name: 
-    m_Color: {r: 0.52549, g: 0.866667, b: 0.698039, a: 1}
+    m_Color: {r: 0.85098, g: 0.411765, b: 0.372549, a: 1}
