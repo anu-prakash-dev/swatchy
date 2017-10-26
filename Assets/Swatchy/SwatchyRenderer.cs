@@ -18,8 +18,12 @@ namespace Swatchy {
 		static int colorId;
 
 		void Awake() {
+			if (swatchyColor == null) {
+				swatchyColor = new SwatchyColor();
+			}
 			Apply();
 			swatchyColor.OnColorChanged += Apply;
+			hasSubscribed = true;
 			Debug.Log("[Awake] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
 
 		}
@@ -48,6 +52,7 @@ namespace Swatchy {
 		}
 		void OnDisable() {
 			Debug.Log("[OnDisable] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
+			hasSubscribed = false;
 		}
 		void OnEnable() {
 			Debug.Log("[OnEnable] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
