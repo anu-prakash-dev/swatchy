@@ -10,6 +10,7 @@ namespace Swatchy {
 	public class SwatchyRenderer : MonoBehaviour {
 
 		public SwatchyColor swatchyColor;
+		[HideInInspector]
 		public Renderer renderer;
 
 		static MaterialPropertyBlock mpb;
