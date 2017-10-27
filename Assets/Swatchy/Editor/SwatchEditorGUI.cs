@@ -10,7 +10,9 @@ namespace Swatchy {
 	[CustomEditor(typeof(Swatch))]
 	public class SwatchEditorGUI : Editor {
 		private bool merge;
+		private bool replace;
 		private Swatch mergeObject;
+		private Swatch replaceObject;
 
 		public override void OnInspectorGUI() {
 			base.OnInspectorGUI();
@@ -39,6 +41,22 @@ namespace Swatchy {
 				}
 			}
 
+			if (GUILayout.Button(merge ? "Cancel Replace" : "Replace With Another Swatch")) {
+				mergeObject = null;
+				replace = !replace;
+			}
+			if (replace) {
+				replaceObject = (Swatch)EditorGUILayout.ObjectField(replaceObject, typeof(Swatch));
+				if (replaceObject != null) {
+					if (GUILayout.Button("Replace")) {
+						swatch.ReplaceSelfWithOtherSwatch(replaceObject);
+						replaceObject = null;
+						replace = false;
+						SwatchEditorGUI.GameViewRepaint();
+					}
+
+				}
+			}
 
 
 
@@ -57,6 +75,8 @@ namespace Swatchy {
 
 				}
 			}
+
+
 
 
 			if (GUILayout.Button("Export To Library")) {

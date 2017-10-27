@@ -24,18 +24,24 @@ namespace Swatchy {
 
 			var swatchProperty = property.FindPropertyRelative("_swatch");
 			var colorIndexProperty = property.FindPropertyRelative("_colorIndex");
+			var usingSwatchGroupProperty = property.FindPropertyRelative("_usingSwatchGroup");
+			var swatchGroupProperty = property.FindPropertyRelative("_swatchGroup");
 
 			position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
 
 			var swatchSize 				= EditorGUIUtility.singleLineHeight;
 			var keySize 				= EditorGUIUtility.singleLineHeight*1.25f;
 			var spacing 				= EditorGUIUtility.singleLineHeight * 0.5f;
-			var swatchObjectWidth  		= swatch == null ? position.width : position.width - swatchSize - keySize - spacing * 2;
-			var swatchObjectPositionX 	= swatch == null ? position.x : position.x + swatchSize + keySize + spacing * 2;
+			//var toggleSize				= EditorGUIUtility.singleLineHeight;
+			var toggleSize = 0;
+			var swatchObjectPositionX 	= swatch == null ? position.x : position.x + swatchSize + keySize + toggleSize + spacing * 2;
+			//var swatchObjectWidth = swatch == null ? position.width : position.width - swatchSize - keySize - spacing * 2;
+			var swatchObjectWidth		= position.width - swatchObjectPositionX + position.x;
 			var swatchObjectRect 		= new Rect(swatchObjectPositionX, position.y, swatchObjectWidth, EditorGUIUtility.singleLineHeight);
 			var swatchRect 				= new Rect(position.x, position.y, swatchSize, EditorGUIUtility.singleLineHeight);
 			var colorIndexRect 			= new Rect(swatchRect.position.x + swatchRect.width + spacing, position.y, keySize, EditorGUIUtility.singleLineHeight);
-
+			var usingSwatchGroupToggleR	= new Rect(colorIndexRect.position.x + colorIndexRect.width + spacing, position.y, toggleSize, toggleSize);
+			
 			EditorGUI.BeginProperty(position, label, property);
 
 
@@ -53,8 +59,14 @@ namespace Swatchy {
 				UpdateActiveSwatch(swatchyColor.color);
 			}
 
-			// Draw Color index text field
 			if (swatch != null) {
+				// Draw Color Field
+				if (DrawTextureButton(swatchTexture, swatchRect)) {
+					paletteOpen = !paletteOpen && swatch != null && swatch.colors != null && swatch.colors.Length > 0;
+				}
+				DrawBlackGrid(swatchRect.x, swatchRect.y, 1, 1, (int)EditorGUIUtility.singleLineHeight);
+
+				// Draw Color index text field
 				EditorGUI.BeginChangeCheck();
 				EditorGUI.PropertyField(colorIndexRect, colorIndexProperty, GUIContent.none);
 				if (EditorGUI.EndChangeCheck()) {
@@ -62,11 +74,9 @@ namespace Swatchy {
 					swatchyColor.colorIndex = colorIndexProperty.intValue; // hack which calls observer pattern
 					UpdateActiveSwatch(swatchyColor.color);
 				}
-
-				if (DrawTextureButton(swatchTexture, swatchRect)) {
-					paletteOpen = !paletteOpen && swatch != null && swatch.colors != null && swatch.colors.Length > 0;
-				}
-				DrawBlackGrid(swatchRect.x, swatchRect.y, 1, 1, (int)EditorGUIUtility.singleLineHeight);
+				// Draw Toggle
+				//EditorGUI.PropertyField(usingSwatchGroupToggleR, usingSwatchGroupProperty, GUIContent.none);
+				//usingSwatchGroupProperty.boolValue = EditorGUI.Toggle(usingSwatchGroupToggleR, usingSwatchGroupProperty.boolValue);
 
 				if (paletteOpen) {
 					if (palleteTexture == null) {

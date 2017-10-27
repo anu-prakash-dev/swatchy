@@ -18,44 +18,50 @@ namespace Swatchy {
 		static int colorId;
 
 		void Awake() {
-			if (swatchyColor == null) {
-				swatchyColor = new SwatchyColor();
-			}
-			Apply();
-			swatchyColor.OnColorChanged += Apply;
-			hasSubscribed = true;
-			Debug.Log("[Awake] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
-
+			
 		}
-		/*
+
 		void OnDestroy() {
+			Debug.Log("[OnDestroy] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
 			swatchyColor.OnColorChanged -= Apply;
 		}
-		*/
+
+
 
 
 		// a hack to subscribe to this object after it's created in the editor
 #if UNITY_EDITOR
 		private bool hasSubscribed;
+		/*
 		void OnValidate() {
 			Debug.Log("[OnValidate] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
 			if (swatchyColor != null && !hasSubscribed) {
-				swatchyColor.OnColorChanged += Apply;
 				hasSubscribed = true;
 				Apply();
 			}
 		}
+		*/
 
-
+		/*
 		void OnDestroy() {
 			Debug.Log("[OnDestroy] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
 		}
+		*/
 		void OnDisable() {
 			Debug.Log("[OnDisable] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
 			hasSubscribed = false;
+			swatchyColor.OnColorChanged -= Apply;
 		}
 		void OnEnable() {
 			Debug.Log("[OnEnable] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
+			if (swatchyColor == null) {
+				swatchyColor = new SwatchyColor();
+			}
+			Apply();
+			swatchyColor.OnColorChanged += Apply;
+			swatchyColor.swatch = swatchyColor.swatch; // hack to resetup event listener
+			hasSubscribed = true;
+			Debug.Log("[Awake] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());
 		}
 		void Reset() {
 			Debug.Log("[Reset] hasSubscribed ; " +hasSubscribed+" is not null " + (swatchyColor != null).ToString());

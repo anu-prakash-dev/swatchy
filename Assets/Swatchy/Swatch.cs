@@ -2,10 +2,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using SmartWeakEvent;
+//https://www.codeproject.com/Articles/29922/Weak-Events-in-C#heading0002
+//https://gist.github.com/dgrunwald/6445360
 namespace Swatchy {
 	public class Swatch : ScriptableObject {
 		public Color[] colors;
+
+		public event Action OnSwatchChanged2;
+
+		public event EventHandler OnSwatchChanged {
+			add { _event.Add(value); }
+			remove { _event.Remove(value); }
+		}
+
+		[NonSerialized]
+		private FastSmartWeakEvent<EventHandler> _event = new FastSmartWeakEvent<EventHandler>();
 
 		public Color GetColor(int colorIndex) {
 			if (colors == null || colors.Length <= colorIndex || colorIndex < 0) {
@@ -34,11 +46,30 @@ namespace Swatchy {
 		}
 
 		public void AddColorsFromOtherSwatch(Swatch otherSwatch) {
+			if (this.colors == null) {
+				this.colors = new Color[0];
+			}
 			int i = this.colors.Length;
 			Array.Resize<Color>(ref this.colors, this.colors.Length + otherSwatch.colors.Length);
 			for (int j = 0; j < otherSwatch.colors.Length; j++) { 
 				this.colors[i++] = otherSwatch.colors[j];
 			}
+		}
+
+		public void ReplaceSelfWithOtherSwatch(Swatch otherSwatch) {
+			Array.Resize<Color>(ref colors, otherSwatch.colors.Length);
+			Array.Copy(otherSwatch.colors, colors, otherSwatch.colors.Length);
+			Debug.Log("[Swatch] Calling Event");
+			_event.Raise(this, EventArgs.Empty);
+			if (OnSwatchChanged2 != null)
+				OnSwatchChanged2();
+
+			/*
+			if (OnSwatchChanged != null)
+				OnSwatchChanged();
+			else
+				Debug.Log("Swatch this event was null");
+			*/
 		}
 	}
 }
