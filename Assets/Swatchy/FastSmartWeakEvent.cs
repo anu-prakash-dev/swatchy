@@ -107,7 +107,6 @@ namespace SmartWeakEvent
 				oldDelegate = _raiseDelegate;
 				newDelegate = Delegate.Combine(oldDelegate, d);
 			} while (Interlocked.CompareExchange(ref _raiseDelegate, newDelegate, oldDelegate) != oldDelegate);
-			UnityEngine.Debug.Log("FastSmartWeakEvent delgate size: " + _raiseDelegate.GetInvocationList().Length);
 		}
 		
 		void RemoveFromRaiseDelegate(Delegate d)

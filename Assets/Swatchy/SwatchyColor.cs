@@ -19,10 +19,15 @@ namespace Swatchy {
 	[Serializable]
 	public class SwatchyColor {
 		public SwatchyColor() {
-			Debug.Log("[SwatchyColor] Constructor");
+		}
+		public void OnEnable() {
+			swatch = _swatch; // this will subscribe to changes in the swatch, and call OnColorChanged
+		}
+		public void OnDisable() {
+			if (_swatch != null)
+				_swatch.OnSwatchChanged -= OnSwatchChanged;
 		}
 		void OnSwatchChanged(object sender, EventArgs e) {
-			Debug.Log("[SwatchyColor] OnSwatchChanged");
 			if (OnColorChanged != null)
 				OnColorChanged();
 		}
@@ -44,7 +49,6 @@ namespace Swatchy {
 				_swatch = value;
 				if (_swatch != null)
 					_swatch.OnSwatchChanged += OnSwatchChanged;
-				Debug.Log("[SwatchyColor] Subscribed to changes");
 				if (OnColorChanged != null)
 					OnColorChanged();
 			}

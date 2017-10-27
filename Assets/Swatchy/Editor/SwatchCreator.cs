@@ -6,11 +6,6 @@ using System.IO;
 
 namespace Swatchy {
 	public static class SwatchCreator {
-		[MenuItem("Assets/Swatchy/Create Swatchy Group")]
-		public static void CreateSwatchyGoup() {
-			SwappableSwatch asset = ScriptableObject.CreateInstance<SwappableSwatch>();
-			ProjectWindowUtil.CreateAsset(asset, "New Swatchy Group.asset");
-		}
 
 		[MenuItem("Assets/Swatchy/Create Swatchy Palette")]
 		public static void CreateSwatch() {

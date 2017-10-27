@@ -59,10 +59,7 @@ namespace Swatchy {
 		public void ReplaceSelfWithOtherSwatch(Swatch otherSwatch) {
 			Array.Resize<Color>(ref colors, otherSwatch.colors.Length);
 			Array.Copy(otherSwatch.colors, colors, otherSwatch.colors.Length);
-			Debug.Log("[Swatch] Calling Event");
-			_event.Raise(this, EventArgs.Empty);
-			if (OnSwatchChanged2 != null)
-				OnSwatchChanged2();
+			SignalChange();
 
 			/*
 			if (OnSwatchChanged != null)
@@ -70,6 +67,10 @@ namespace Swatchy {
 			else
 				Debug.Log("Swatch this event was null");
 			*/
+		}
+
+		public void SignalChange() {
+			_event.Raise(this, EventArgs.Empty);
 		}
 	}
 }

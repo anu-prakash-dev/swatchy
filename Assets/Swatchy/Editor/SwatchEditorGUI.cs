@@ -15,8 +15,14 @@ namespace Swatchy {
 		private Swatch replaceObject;
 
 		public override void OnInspectorGUI() {
-			base.OnInspectorGUI();
 			Swatch swatch = (Swatch)target;
+			EditorGUI.BeginChangeCheck();
+			base.OnInspectorGUI();
+			if (EditorGUI.EndChangeCheck()) {
+				swatch.SignalChange();
+				SwatchEditorGUI.GameViewRepaint();
+			}
+
 			if (GUILayout.Button("Add .ASE")) {
 				var path = EditorUtility.OpenFilePanel("Swatchy Import", "", "ase");
 				if (path != null && path != string.Empty) {
@@ -41,11 +47,42 @@ namespace Swatchy {
 				}
 			}
 
-			if (GUILayout.Button(merge ? "Cancel Replace" : "Replace With Another Swatch")) {
-				mergeObject = null;
+			if (GUILayout.Button(replace ? "Cancel Replace" : "Replace With Another Swatch")) {
 				replace = !replace;
+				if (replace) {
+					LoadOtherSwatches();
+				}
 			}
+
 			if (replace) {
+				if (otherSwatchGUIDs != null && otherSwatchFilenames != null) {
+					var lastRect = GUILayoutUtility.GetLastRect();
+					var indent = 50;
+					lastRect.x += indent;
+					lastRect.width -= indent;
+					var spacing = 3;
+					GUILayout.Space((EditorGUIUtility.singleLineHeight+spacing) * otherSwatchGUIDs.Length);
+					for (int i = 0; i < otherSwatchGUIDs.Length; i++) {
+						var swatchName = otherSwatchFilenames[i];
+
+						var buttonRect = new Rect(lastRect.x, lastRect.y + EditorGUIUtility.singleLineHeight + spacing, lastRect.width, EditorGUIUtility.singleLineHeight);
+						lastRect = buttonRect;
+						if (GUI.Button(buttonRect, swatchName)) {
+							var otherSwatchAssetPath = AssetDatabase.GUIDToAssetPath(otherSwatchGUIDs[i]);
+							var otherSwatch = AssetDatabase.LoadAssetAtPath<Swatch>(otherSwatchAssetPath);
+							if (otherSwatch != null) {
+								swatch.ReplaceSelfWithOtherSwatch(otherSwatch);
+								SwatchEditorGUI.GameViewRepaint();
+							}
+							else {
+								Debug.LogError("[SwatchEditorGUI] couldnt load asset at path: " +otherSwatchAssetPath);
+							}
+							break;
+						}
+					}
+				}
+			}
+			if (replace && false) {
 				replaceObject = (Swatch)EditorGUILayout.ObjectField(replaceObject, typeof(Swatch));
 				if (replaceObject != null) {
 					if (GUILayout.Button("Replace")) {
@@ -55,6 +92,30 @@ namespace Swatchy {
 						SwatchEditorGUI.GameViewRepaint();
 					}
 
+				}
+
+				var swatchGUIDs = AssetDatabase.FindAssets("t:Swatch");
+				var selfGUID = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(target.GetInstanceID()));
+				if (swatchGUIDs != null) {
+					var lastRect = GUILayoutUtility.GetLastRect();
+					var indent = 50;
+					lastRect.x += indent;
+					lastRect.width -= indent;
+					var spacing = 3;
+					GUILayout.Space((EditorGUIUtility.singleLineHeight+spacing) * (swatchGUIDs.Length - 1));
+					for (int i = 0; i < swatchGUIDs.Length; i++) {
+						if (swatchGUIDs[i].Equals(selfGUID)) {
+							continue;
+						}
+						var swatchPath = AssetDatabase.GUIDToAssetPath(swatchGUIDs[i]);
+						var swatchName = System.IO.Path.GetFileNameWithoutExtension(swatchPath);
+
+						var buttonRect = new Rect(lastRect.x, lastRect.y + EditorGUIUtility.singleLineHeight + spacing, lastRect.width, EditorGUIUtility.singleLineHeight);
+						lastRect = buttonRect;
+						GUI.Button(buttonRect, swatchName);
+
+//						EditorGUILayout.LabelField(swatchName);
+					}
 				}
 			}
 
@@ -81,6 +142,28 @@ namespace Swatchy {
 
 			if (GUILayout.Button("Export To Library")) {
 				SwatchPresetExporter.ExportToColorPresetLibrary(swatch);
+			}
+		}
+
+		string[] otherSwatchGUIDs;
+		string[] otherSwatchFilenames;
+
+		void LoadOtherSwatches() {
+			var swatchGUIDs = AssetDatabase.FindAssets("t:Swatch");
+			var selfGUID = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(target.GetInstanceID()));
+			int iterator = 0;
+			int numOtherSwatches = swatchGUIDs.Length - 1;
+			otherSwatchGUIDs = new string[numOtherSwatches];
+			otherSwatchFilenames = new string[numOtherSwatches];
+			for (int i = 0; i < swatchGUIDs.Length; i++) {
+				if (swatchGUIDs[i].Equals(selfGUID)) {
+					continue;
+				}
+				var swatchPath = AssetDatabase.GUIDToAssetPath(swatchGUIDs[i]);
+				var swatchName = System.IO.Path.GetFileNameWithoutExtension(swatchPath);
+
+				otherSwatchGUIDs[iterator] = swatchGUIDs[i];
+				otherSwatchFilenames[iterator++] = swatchName;
 			}
 		}
 
