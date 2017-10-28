@@ -61,7 +61,7 @@ namespace Swatchy {
 		}
 
 
-		public static void ParseSwatch(BinaryReader byteReader, List<FloatThree> colors) {
+		public void ParseSwatch(BinaryReader byteReader, List<FloatThree> colors) {
 			
 			byte b1 = byteReader.ReadByte();
 			byte b2 = byteReader.ReadByte();
@@ -77,7 +77,7 @@ namespace Swatchy {
 			byteReader.BaseStream.Seek(-2, SeekOrigin.Current);
 		}
 
-		public static void DictForChunk(BinaryReader byteReader, out string name, out FloatThree rgb) {
+		public void DictForChunk(BinaryReader byteReader, out string name, out FloatThree rgb) {
 			var chunk_length = ReadBigEndianInt32(byteReader);
 			byte[] bytes = byteReader.ReadBytes(chunk_length);
 

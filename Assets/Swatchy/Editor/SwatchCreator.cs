@@ -16,6 +16,7 @@ namespace Swatchy {
 		public static Swatch CreateSwatchFromASEFile(SwatchASEFile aseFile, string projectSaveDestination) {
 			Swatch swatch = Swatch.FromSwatchASEFile(aseFile);
 
+			projectSaveDestination = AssetDatabase.GenerateUniqueAssetPath(projectSaveDestination);
 			AssetDatabase.CreateAsset(swatch, projectSaveDestination);
 			AssetDatabase.SaveAssets();
 
@@ -29,7 +30,7 @@ namespace Swatchy {
 			var activeObject = (Swatch)Selection.activeObject;
 			Swatch asset = ScriptableObject.CreateInstance<Swatch>();
 			asset.AddColorsFromOtherSwatch(activeObject);
-			ProjectWindowUtil.CreateAsset(asset, "Copy of " + activeObject.name+".asset");
+			ProjectWindowUtil.CreateAsset(asset, activeObject.name+".asset");
 		}
 		[MenuItem("Assets/Swatchy/Duplicate Swatchy Pallete", true)]
 		public static bool ValidateDuplicateSwatch() {
