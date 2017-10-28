@@ -29,7 +29,7 @@ namespace Zaikman {
 		}
 	}
 }
-//#if UNITY_EDITOR
+#if UNITY_EDITOR
 namespace Zaikman {
 [CustomPropertyDrawer(typeof(InspectorButtonAttribute))]
 public class InspectorButtonPropertyDrawer : PropertyDrawer
@@ -57,4 +57,4 @@ public class InspectorButtonPropertyDrawer : PropertyDrawer
   }
 }
 }
-//#endif
+#endif

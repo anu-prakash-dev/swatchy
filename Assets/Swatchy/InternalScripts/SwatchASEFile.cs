@@ -5,6 +5,8 @@ using System.Collections.Generic;
 namespace Swatchy {
 	public class SwatchASEFile {
 		#pragma warning disable 0219
+		bool hasWarnedCMYK = false;
+		bool hasWarnedLAB = false;
 		public class FloatThree {
 			public float r,g,b;
 			public FloatThree(float r, float g, float b) {
@@ -81,23 +83,74 @@ namespace Swatchy {
 
 			int title_length = 2 * (bytes[0] << 8 | bytes[1]);
 			name = ReadBigEndianU16String(bytes, 2, title_length).Trim('\0');
-			int color_data_start = 2+title_length;
+			int color_data_start = 2 + title_length;
 			if (color_data_start < chunk_length) {
-				char[] colorMode = new char[]{(char)bytes[color_data_start], (char)bytes[color_data_start+1], (char)bytes[color_data_start+2], (char)bytes[color_data_start+3]};
+				char[] colorMode = new char[] {
+					(char)bytes[color_data_start],
+					(char)bytes[color_data_start + 1],
+					(char)bytes[color_data_start + 2],
+					(char)bytes[color_data_start + 3]
+				};
+				string colorModeStr = new string(colorMode).Trim().Trim('\0');
+				switch (colorModeStr) {
+				case "RGB": {
+					float r = ReadBigEndianFloat(bytes, color_data_start+4);
+					float g = ReadBigEndianFloat(bytes, color_data_start+8);
+					float b = ReadBigEndianFloat(bytes, color_data_start+12);
+					short swatch_type = ReadBigEndianInt16(bytes, color_data_start+16);
+					rgb = new FloatThree(r,g,b);
+					break;
+				}
+				case "CMYK": {
+					if (!hasWarnedCMYK) {
+						UnityEngine.Debug.LogWarning("[SwatchASEFile] CMYK Color conversion ignores color space and won't be that good.");
+						hasWarnedCMYK = true;
+					}
+					float c = ReadBigEndianFloat(bytes, color_data_start+4);
+					float m = ReadBigEndianFloat(bytes, color_data_start+8);
+					float y = ReadBigEndianFloat(bytes, color_data_start+12);
+					float k = ReadBigEndianFloat(bytes, color_data_start+16);
+					short swatch_type = ReadBigEndianInt16(bytes, color_data_start+20);
+					rgb = CMYKtoRGB(c,m,y,k);
+					break;
+				}
+				case "Gray": {
+					float g = ReadBigEndianFloat(bytes, color_data_start+4);
+					short swatch_type = ReadBigEndianInt16(bytes, color_data_start+16);
+					rgb = new FloatThree(g,g,g);
+					break;
+				}
+				case "HSB": {
+					float h = ReadBigEndianFloat(bytes, color_data_start+4);
+					float s = ReadBigEndianFloat(bytes, color_data_start+8);
+					float b = ReadBigEndianFloat(bytes, color_data_start+12);
+					short swatch_type = ReadBigEndianInt16(bytes, color_data_start+16);
+					rgb = HSVToRGB(h,s,b);
+					break;
+				}
+				case "LAB": {
+					if (!hasWarnedLAB) {
+						UnityEngine.Debug.LogError("[SwatchASEFile] LAB Color format not supported");
+						hasWarnedLAB = true;
+					}
+					float l = ReadBigEndianFloat(bytes, color_data_start+4);
+					float a = ReadBigEndianFloat(bytes, color_data_start+8);
+					float b = ReadBigEndianFloat(bytes, color_data_start+12);
+					short swatch_type = ReadBigEndianInt16(bytes, color_data_start+16);
+					rgb = new FloatThree(1,1,1);
+					break;
+				}
+				default:
+					rgb = new FloatThree(1,1,1);
+					break;
+				}
 
-				// assert RGB for now
-				float r = ReadBigEndianFloat(bytes, color_data_start+4);
-				float g = ReadBigEndianFloat(bytes, color_data_start+8);
-				float b = ReadBigEndianFloat(bytes, color_data_start+12);
-				short swatch_type = ReadBigEndianInt16(bytes, color_data_start+16);
-
-				rgb = new FloatThree(r,g,b);
+				
 			}
 			else {
 				rgb = new FloatThree(0,0,0);
 			}
 		}
-
 		public static int ReadBigEndianInt32(BinaryReader byteReader) {
 			byte[] p = byteReader.ReadBytes(4);
 			return p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3];
@@ -132,6 +185,20 @@ namespace Swatchy {
 		public static string ReadBigEndianU16String(byte[] bytes, int index, int length) {
 			return System.Text.Encoding.BigEndianUnicode.GetString(bytes, index, length);
 		}
+
+		public static FloatThree CMYKtoRGB( float c, float m, float y, float k ) {
+			var black = 1f - k;
+			float r = (1f - c) * black;
+			float g = (1f - m) * black;
+			float b = (1f - y) * black;
+			return new FloatThree( r, g, b);
+		}
+
+		public static FloatThree HSVToRGB( float h, float s, float v) {
+			UnityEngine.Color c = UnityEngine.Color.HSVToRGB(h, s, v);
+			return new FloatThree(c.r, c.g, c.b);
+		}
+
 		#pragma warning restore 0219
 	}
 }
