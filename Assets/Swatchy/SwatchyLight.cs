@@ -5,12 +5,12 @@ using UnityEngine;
 namespace Swatchy {
 [RequireComponent(typeof(Light))]
 public class SwatchyLight : SwatchyColorApplier {
-	private Light light;
+	private Light swatchingLight;
 	public override void Apply () {
-		if (light == null) {
-			light = GetComponent<Light>();
+		if (swatchingLight == null) {
+			swatchingLight = GetComponent<Light>();
 		}
-		light.color = swatchyColor.color;
+		swatchingLight.color = swatchyColor.color;
 	}
 }
 }

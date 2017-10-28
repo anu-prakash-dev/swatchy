@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Swatchy {
 	public class SwatchASEFile {
-		
+		#pragma warning disable 0219
 		public class FloatThree {
 			public float r,g,b;
 			public FloatThree(float r, float g, float b) {
@@ -17,7 +17,10 @@ namespace Swatchy {
 		public string title;
 		public List<FloatThree> colors;
 
-		public SwatchASEFile(string filePath) : this(File.ReadAllBytes(filePath)){}
+		public SwatchASEFile(string filePath)
+			: this(File.ReadAllBytes(filePath)) {
+		}
+
 		public SwatchASEFile(byte[] bytes) {
 			var byteReader = new BinaryReader(new MemoryStream(bytes, false), System.Text.Encoding.UTF8);
 
@@ -25,6 +28,10 @@ namespace Swatchy {
 			int v_major = ReadBigEndianInt16(byteReader);
 			int v_minor = ReadBigEndianInt16(byteReader);
 			int chunk_count = ReadBigEndianInt32(byteReader);
+
+			if (header[0] != 'A' || header[1] != 'S' || header[2] != 'E' || header[3] != 'F') {
+				UnityEngine.Debug.LogError("[SwatchASEFile] File header did not match ASEF");
+			}
 			// assert header == "A" "S" "E" "F"
 
 			colors = new List<FloatThree>();
@@ -125,5 +132,6 @@ namespace Swatchy {
 		public static string ReadBigEndianU16String(byte[] bytes, int index, int length) {
 			return System.Text.Encoding.BigEndianUnicode.GetString(bytes, index, length);
 		}
+		#pragma warning restore 0219
 	}
 }

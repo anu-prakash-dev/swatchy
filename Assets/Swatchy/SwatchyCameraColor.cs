@@ -6,12 +6,12 @@ namespace Swatchy {
 	[RequireComponent(typeof(Camera))]
 	public class SwatchyCameraColor : SwatchyColorApplier {
 		[HideInInspector]
-		public Camera camera;
+		public Camera swatchingCamera;
 		public override void Apply() {
-			if (camera == null) {
-				camera = GetComponent<Camera>();
+			if (swatchingCamera == null) {
+				swatchingCamera = GetComponent<Camera>();
 			}
-			camera.backgroundColor = swatchyColor.color;
+			swatchingCamera.backgroundColor = swatchyColor.color;
 		}
 	}
 }

@@ -82,43 +82,6 @@ namespace Swatchy {
 					}
 				}
 			}
-			if (replace && false) {
-				replaceObject = (Swatch)EditorGUILayout.ObjectField(replaceObject, typeof(Swatch));
-				if (replaceObject != null) {
-					if (GUILayout.Button("Replace")) {
-						swatch.ReplaceSelfWithOtherSwatch(replaceObject);
-						replaceObject = null;
-						replace = false;
-						SwatchEditorGUI.GameViewRepaint();
-					}
-
-				}
-
-				var swatchGUIDs = AssetDatabase.FindAssets("t:Swatch");
-				var selfGUID = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(target.GetInstanceID()));
-				if (swatchGUIDs != null) {
-					var lastRect = GUILayoutUtility.GetLastRect();
-					var indent = 50;
-					lastRect.x += indent;
-					lastRect.width -= indent;
-					var spacing = 3;
-					GUILayout.Space((EditorGUIUtility.singleLineHeight+spacing) * (swatchGUIDs.Length - 1));
-					for (int i = 0; i < swatchGUIDs.Length; i++) {
-						if (swatchGUIDs[i].Equals(selfGUID)) {
-							continue;
-						}
-						var swatchPath = AssetDatabase.GUIDToAssetPath(swatchGUIDs[i]);
-						var swatchName = System.IO.Path.GetFileNameWithoutExtension(swatchPath);
-
-						var buttonRect = new Rect(lastRect.x, lastRect.y + EditorGUIUtility.singleLineHeight + spacing, lastRect.width, EditorGUIUtility.singleLineHeight);
-						lastRect = buttonRect;
-						GUI.Button(buttonRect, swatchName);
-
-//						EditorGUILayout.LabelField(swatchName);
-					}
-				}
-			}
-
 
 
 			if (GUILayout.Button(merge ? "Cancel Merge" : "Merge With Another Swatch")) {
@@ -126,7 +89,7 @@ namespace Swatchy {
 				merge = !merge;
 			}
 			if (merge) {
-				mergeObject = (Swatch)EditorGUILayout.ObjectField(mergeObject, typeof(Swatch));
+				mergeObject = (Swatch)EditorGUILayout.ObjectField(mergeObject, typeof(Swatch), false);
 				if (mergeObject != null) {
 					if (GUILayout.Button("Merge")) {
 						swatch.AddColorsFromOtherSwatch(mergeObject);
@@ -140,7 +103,7 @@ namespace Swatchy {
 
 
 
-			if (GUILayout.Button("Export To Library")) {
+			if (GUILayout.Button("Export To Color Picker Presets")) {
 				SwatchPresetExporter.ExportToColorPresetLibrary(swatch);
 			}
 		}

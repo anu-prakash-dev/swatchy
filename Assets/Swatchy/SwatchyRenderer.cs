@@ -10,21 +10,21 @@ namespace Swatchy {
 	public class SwatchyRenderer : SwatchyColorApplier {
 
 		[HideInInspector]
-		public Renderer renderer;
+		public Renderer swatchingRenderer;
 
 		static MaterialPropertyBlock mpb;
-		static int colorId;
+		static int colorShaderId;
 
 		public override void Apply() {
 			if (mpb == null) {
 				mpb = new MaterialPropertyBlock();
-				colorId = Shader.PropertyToID("_Color");
+				colorShaderId = Shader.PropertyToID("_Color");
 			}
-			if (renderer == null) {
-				renderer = GetComponent<Renderer>();
+			if (swatchingRenderer == null) {
+				swatchingRenderer = GetComponent<Renderer>();
 			}
-			mpb.SetColor(colorId, swatchyColor.color);
-			renderer.SetPropertyBlock(mpb);
+			mpb.SetColor(colorShaderId, swatchyColor.color);
+			swatchingRenderer.SetPropertyBlock(mpb);
 		}
 	}
 }

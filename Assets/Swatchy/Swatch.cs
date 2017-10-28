@@ -9,8 +9,6 @@ namespace Swatchy {
 	public class Swatch : ScriptableObject {
 		public Color[] colors;
 
-		public event Action OnSwatchChanged2;
-
 		public event EventHandler OnSwatchChanged {
 			add { _event.Add(value); }
 			remove { _event.Remove(value); }

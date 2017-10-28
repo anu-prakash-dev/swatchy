@@ -7,7 +7,7 @@ using System.IO;
 namespace Swatchy {
 	public static class SwatchCreator {
 
-		[MenuItem("Assets/Swatchy/Create Swatchy Palette")]
+		[MenuItem("Assets/Swatchy/Create New Swatchy Palette")]
 		public static void CreateSwatch() {
 			Swatch asset = ScriptableObject.CreateInstance<Swatch>();
 			ProjectWindowUtil.CreateAsset(asset, "New Swatch.asset");
@@ -24,6 +24,30 @@ namespace Swatchy {
 			return swatch;
 		}
 
+		[MenuItem("Assets/Swatchy/Duplicate Swatchy Pallete")]
+		public static void DuplicateSwatch() {
+			var activeObject = (Swatch)Selection.activeObject;
+			Swatch asset = ScriptableObject.CreateInstance<Swatch>();
+			asset.AddColorsFromOtherSwatch(activeObject);
+			ProjectWindowUtil.CreateAsset(asset, "Copy of " + activeObject.name+".asset");
+		}
+		[MenuItem("Assets/Swatchy/Duplicate Swatchy Pallete", true)]
+		public static bool ValidateDuplicateSwatch() {
+			var activeObject = Selection.activeObject;
+			return activeObject != null && activeObject is Swatch;
+		}
+
+		[MenuItem("Assets/Swatchy/Export Swatchy Pallete To Color Presets")]
+		public static void ExportToPresets() {
+			var activeObject = (Swatch)Selection.activeObject;
+			SwatchPresetExporter.ExportToColorPresetLibrary(activeObject);
+		}
+
+		[MenuItem("Assets/Swatchy/Export Swatchy Pallete To Color Presets", true)]
+		public static bool ValidateExportToPresets() {
+			var activeObject = Selection.activeObject;
+			return activeObject != null && activeObject is Swatch;
+		}
 
 		[MenuItem("Assets/Swatchy/Import ASE File")]
 		static void ImportSelectedASEFile() {
@@ -31,13 +55,11 @@ namespace Swatchy {
 			var path = AssetDatabase.GetAssetPath(activeObject.GetInstanceID());
 			var fullPath = path.Replace("Assets", Application.dataPath);
 			var saveDestination = path.Replace(".ase", ".asset");
-			Debug.Log("[Swatchy] Import path: " + path);
 
 			var aseFile = new SwatchASEFile(fullPath);
 			CreateSwatchFromASEFile(aseFile, saveDestination);
 		}
 
-		
 		[MenuItem("Assets/Swatchy/Import ASE File", true)]
 		static bool ValidateImportSelectedASEFile() {
 			var activeObject = Selection.activeObject;
@@ -57,7 +79,7 @@ namespace Swatchy {
 			}
 		}
 
-		[MenuItem("Assets/Swatchy/Import ASE Folder Into One Pallete")]
+		[MenuItem("Assets/Swatchy/Import ASE Folder Into One Pallete (Browse...)")]
 		static void ImportASEFolderIntoOne() {
 			var path = EditorUtility.OpenFolderPanel("Swatchy Import Folder", "", "");
 			if (path != null && path != string.Empty) {
@@ -78,7 +100,7 @@ namespace Swatchy {
 			}
 		}
 
-		[MenuItem("Assets/Swatchy/Import ASE Folder Into Many Palletes")]
+		[MenuItem("Assets/Swatchy/Import ASE Folder Into Seperate Palletes (Browse...)")]
 		static void ImportASEFolderIntoMany() {
 			var path = EditorUtility.OpenFolderPanel("Swatchy Import Folder", "", "");
 			if (path != null && path != string.Empty) {

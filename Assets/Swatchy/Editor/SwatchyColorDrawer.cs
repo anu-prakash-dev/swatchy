@@ -24,8 +24,6 @@ namespace Swatchy {
 
 			var swatchProperty = property.FindPropertyRelative("_swatch");
 			var colorIndexProperty = property.FindPropertyRelative("_colorIndex");
-			var usingSwatchGroupProperty = property.FindPropertyRelative("_usingSwatchGroup");
-			var swatchGroupProperty = property.FindPropertyRelative("_swatchGroup");
 
 			position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
 
@@ -40,8 +38,7 @@ namespace Swatchy {
 			var swatchObjectRect 		= new Rect(swatchObjectPositionX, position.y, swatchObjectWidth, EditorGUIUtility.singleLineHeight);
 			var swatchRect 				= new Rect(position.x, position.y, swatchSize, EditorGUIUtility.singleLineHeight);
 			var colorIndexRect 			= new Rect(swatchRect.position.x + swatchRect.width + spacing, position.y, keySize, EditorGUIUtility.singleLineHeight);
-			var usingSwatchGroupToggleR	= new Rect(colorIndexRect.position.x + colorIndexRect.width + spacing, position.y, toggleSize, toggleSize);
-			
+
 			EditorGUI.BeginProperty(position, label, property);
 
 
